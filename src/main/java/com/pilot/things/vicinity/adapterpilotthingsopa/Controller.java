@@ -1,5 +1,10 @@
 package com.pilot.things.vicinity.adapterpilotthingsopa;
 
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+
 import com.pilot.things.vicinity.adapterpilotthingsopa.service.AdapterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,8 +65,15 @@ public class Controller {
     public ResponseEntity getCustomProperty(
             @PathVariable(value ="oid") String thingId,
             @PathVariable(value = "pid") String propertyId
-    ){
-        return ResponseEntity.ok().build();
+    ) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+
+        if(thingId.equals("adream-building") &&
+            propertyId.equals("ADREAM-Production")
+        ){
+            return ResponseEntity.ok(this.adapterService.getData().getValue());
+        }else{
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }

@@ -8,11 +8,12 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import javax.net.ssl.*;
+import javax.swing.text.DateFormatter;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -23,6 +24,7 @@ import com.pilot.things.vicinity.adapterpilotthingsopa.data.BuildingConsumption;
 import com.pilot.things.vicinity.adapterpilotthingsopa.data.vicinity.*;
 import com.pilot.things.vicinity.adapterpilotthingsopa.data.vicinity.schema.BooleanSchema;
 import com.pilot.things.vicinity.adapterpilotthingsopa.data.vicinity.schema.StringSchema;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -130,7 +132,7 @@ public class AdapterService {
     }
 
     public BuildingConsumption getData() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
-        HttpGet getRequest = new HttpGet(this.config.getUrl());
+        HttpGet getRequest = new HttpGet(this.buildUrl(this.config.getUrl()));
         HttpClient client = this.createHttpClient_AcceptsUntrustedCerts(config);
         BuildingConsumption result = new BuildingConsumption();
 
@@ -146,12 +148,6 @@ public class AdapterService {
         LOGGER.debug("{}",response.getStatusLine().getStatusCode());
 
         try (InputStream inputStream = response.getEntity().getContent()) {
-            //            String line;
-            //            BufferedReader bs = new BufferedReader(new InputStreamReader(inputStream));
-            //
-            //            while( !(line = bs.readLine()).isEmpty()){
-            //                LOGGER.debug(line);
-            //            }
 
             MappingIterator<BuildingConsumption> iterator = mapper.readerFor(BuildingConsumption.class)
                                                                   .with(schema)
@@ -170,6 +166,16 @@ public class AdapterService {
         }
 
         return result;
+    }
+
+    private String buildUrl(String url) {
+        Map<String,String> parameters = new HashMap<>();
+        StringSubstitutor substitutor = new StringSubstitutor(parameters);
+        ZonedDateTime date = ZonedDateTime.now().minus(1, ChronoUnit.DAYS);
+
+        parameters.put("date",date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+
+        return substitutor.replace(url);
     }
 
     private HttpGet setHeaders(HttpGet request, ApiConfig config){
