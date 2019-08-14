@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReadLink {
-    private static final String _href = "/objects/{oid}/property/{pid}";
+    private static final String _href = "/objects/{oid}/properties/{pid}";
     String href;
     Output output;
 

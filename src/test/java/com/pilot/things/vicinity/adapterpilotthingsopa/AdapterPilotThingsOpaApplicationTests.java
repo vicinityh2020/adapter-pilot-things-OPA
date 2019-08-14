@@ -5,9 +5,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
+import com.pilot.things.vicinity.adapterpilotthingsopa.data.vicinity.PropertyValue;
 import com.pilot.things.vicinity.adapterpilotthingsopa.exception.AdreamAPIException;
 import com.pilot.things.vicinity.adapterpilotthingsopa.service.AdapterService;
-import com.pilot.things.vicinity.adapterpilotthingsopa.data.BuildingConsumption;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,9 +20,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class AdapterPilotThignsOpaApplicationTests {
+public class AdapterPilotThingsOpaApplicationTests {
 
-	static final Logger LOGGER = getLogger(AdapterPilotThignsOpaApplicationTests.class);
+	static final Logger LOGGER = getLogger(AdapterPilotThingsOpaApplicationTests.class);
 
 	@Autowired
 	AdapterService api;
@@ -33,9 +33,9 @@ public class AdapterPilotThignsOpaApplicationTests {
 
 	@Test
 	public void testApi() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, AdreamAPIException {
-		BuildingConsumption result = this.api.getData();
+		PropertyValue result = this.api.getData();
 
-		LOGGER.debug(result.getValue());
+		LOGGER.debug("{}",result.getValue());
 		Assert.assertNotNull(result.getValue());
 	}
 

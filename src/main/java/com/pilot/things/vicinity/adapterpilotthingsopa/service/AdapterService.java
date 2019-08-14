@@ -8,6 +8,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -131,11 +133,11 @@ public class AdapterService {
                       .build();
     }
 
-    public BuildingConsumption getData()
+    public PropertyValue getData()
             throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, AdreamAPIException {
         HttpGet getRequest = new HttpGet(this.buildUrl(this.config.getUrl()));
         HttpClient client = this.createHttpClient_AcceptsUntrustedCerts(config);
-        BuildingConsumption result = new BuildingConsumption();
+        PropertyValue result = new PropertyValue();
         HttpResponse response = client.execute(this.setHeaders(getRequest, config));
 
         CsvMapper mapper = new CsvMapper();
@@ -160,8 +162,16 @@ public class AdapterService {
                 BuildingConsumption data = iterator.next();
 
                 if (data.getName().equals("PHV.SYNT.TGBT.P_ACT")) {
-                    result.setValue(data.getValue());
-                    result.setChrono(data.getChrono());
+                    result.setName("ADREAM-Production");
+                    result.setValue(Float.parseFloat(data.getValue()));
+                    result.setTimestamp(
+                            ZonedDateTime.now()
+                                         .minus(1,ChronoUnit.DAYS)
+                                         .withZoneSameInstant(ZoneId.of("UTC"))
+                                         .with(LocalTime.MAX)
+                                         .toInstant()
+                                         .toEpochMilli()
+                    );
                 }
             }
         }catch (Exception e) {
@@ -175,10 +185,15 @@ public class AdapterService {
         Map<String,String> parameters = new HashMap<>();
         StringSubstitutor substitutor = new StringSubstitutor(parameters);
         ZonedDateTime date = ZonedDateTime.now().minus(1, ChronoUnit.DAYS);
+        String result;
 
         parameters.put("date",date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 
-        return substitutor.replace(url);
+        result = substitutor.replace(url);
+
+        LOGGER.debug(result);
+
+        return result;
     }
 
     private HttpGet setHeaders(HttpGet request, ApiConfig config){

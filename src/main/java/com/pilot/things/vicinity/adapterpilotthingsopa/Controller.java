@@ -68,11 +68,12 @@ public class Controller {
             @PathVariable(value ="oid") String thingId,
             @PathVariable(value = "pid") String propertyId
     ) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, AdreamAPIException {
+        LOGGER.debug("get property");
 
         if(thingId.equals("adream-building") &&
             propertyId.equals("ADREAM-Production")
         ){
-            return ResponseEntity.ok(this.adapterService.getData().getValue());
+            return ResponseEntity.ok(this.adapterService.getData());
         }else{
             return ResponseEntity.notFound().build();
         }
