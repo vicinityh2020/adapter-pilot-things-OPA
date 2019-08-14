@@ -5,6 +5,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
+import com.pilot.things.vicinity.adapterpilotthingsopa.exception.AdreamAPIException;
 import com.pilot.things.vicinity.adapterpilotthingsopa.service.AdapterService;
 import com.pilot.things.vicinity.adapterpilotthingsopa.data.BuildingConsumption;
 import org.junit.Assert;
@@ -31,7 +32,7 @@ public class AdapterPilotThignsOpaApplicationTests {
 	}
 
 	@Test
-	public void testApi() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+	public void testApi() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, AdreamAPIException {
 		BuildingConsumption result = this.api.getData();
 
 		LOGGER.debug(result.getValue());

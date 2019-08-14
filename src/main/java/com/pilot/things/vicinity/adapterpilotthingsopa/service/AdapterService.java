@@ -13,7 +13,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import javax.net.ssl.*;
-import javax.swing.text.DateFormatter;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -24,6 +23,7 @@ import com.pilot.things.vicinity.adapterpilotthingsopa.data.BuildingConsumption;
 import com.pilot.things.vicinity.adapterpilotthingsopa.data.vicinity.*;
 import com.pilot.things.vicinity.adapterpilotthingsopa.data.vicinity.schema.BooleanSchema;
 import com.pilot.things.vicinity.adapterpilotthingsopa.data.vicinity.schema.StringSchema;
+import com.pilot.things.vicinity.adapterpilotthingsopa.exception.AdreamAPIException;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -131,11 +131,11 @@ public class AdapterService {
                       .build();
     }
 
-    public BuildingConsumption getData() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+    public BuildingConsumption getData()
+            throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException, AdreamAPIException {
         HttpGet getRequest = new HttpGet(this.buildUrl(this.config.getUrl()));
         HttpClient client = this.createHttpClient_AcceptsUntrustedCerts(config);
         BuildingConsumption result = new BuildingConsumption();
-
         HttpResponse response = client.execute(this.setHeaders(getRequest, config));
 
         CsvMapper mapper = new CsvMapper();
@@ -147,16 +147,19 @@ public class AdapterService {
 
         LOGGER.debug("{}",response.getStatusLine().getStatusCode());
 
-        try (InputStream inputStream = response.getEntity().getContent()) {
+        if(response.getStatusLine().getStatusCode() == 500){
+            throw new AdreamAPIException("Adream api internal server error",500);
+        }
 
+        try (InputStream inputStream = response.getEntity().getContent()) {
             MappingIterator<BuildingConsumption> iterator = mapper.readerFor(BuildingConsumption.class)
                                                                   .with(schema)
                                                                   .readValues(inputStream);
 
-            while(iterator.hasNext()){
+            while(iterator.hasNext()) {
                 BuildingConsumption data = iterator.next();
 
-                if(data.getName().equals("PHV.SYNT.TGBT.P_ACT")){
+                if (data.getName().equals("PHV.SYNT.TGBT.P_ACT")) {
                     result.setValue(data.getValue());
                     result.setChrono(data.getChrono());
                 }

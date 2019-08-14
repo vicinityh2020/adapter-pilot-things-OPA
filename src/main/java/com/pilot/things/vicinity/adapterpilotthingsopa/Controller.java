@@ -5,6 +5,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
+import com.pilot.things.vicinity.adapterpilotthingsopa.exception.AdreamAPIException;
 import com.pilot.things.vicinity.adapterpilotthingsopa.service.AdapterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sun.security.jgss.GSSToken;
 
 @RestController
 @RequestMapping("/adapter")
@@ -42,7 +42,7 @@ public class Controller {
 
     private final AdapterService adapterService;
 
-    Controller(AdapterService adapterService) {this.adapterService = adapterService;}
+    public Controller(AdapterService adapterService) {this.adapterService = adapterService;}
 
     @GetMapping(TEST)
     public ResponseEntity getTest(){
@@ -51,6 +51,8 @@ public class Controller {
 
     @GetMapping(value = DISCO,produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity discoverThings(){
+        LOGGER.debug("discovery");
+
         return ResponseEntity.ok(this.adapterService.discoverThings());
     }
 
@@ -65,7 +67,7 @@ public class Controller {
     public ResponseEntity getCustomProperty(
             @PathVariable(value ="oid") String thingId,
             @PathVariable(value = "pid") String propertyId
-    ) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    ) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException, AdreamAPIException {
 
         if(thingId.equals("adream-building") &&
             propertyId.equals("ADREAM-Production")
